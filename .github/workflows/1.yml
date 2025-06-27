@@ -3,14 +3,14 @@ name: 构建 OpenList Magisk 模块
 on:
   schedule:
     - cron: '0 */4 * * *'  # 每4小时运行一次
-  workflow_dispatch:  # 支持手动触发
+  workflow_dispatch:      # 支持手动触发
   push:
     branches:
-      - main  # 推送 main 分支时触发
+      - main              # 推送 main 分支时触发
 
 permissions:
-  contents: write  # 允许推送代码和创建 Release
-  actions: read    # 允许读取 Actions 状态
+  contents: write         # 允许推送代码和创建 Release
+  actions: read           # 允许读取 Actions 状态
 
 jobs:
   build:
@@ -25,67 +25,55 @@ jobs:
       - name: 安装依赖
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl zip gh
+          sudo apt-get install -y curl zip jq gh
 
       # 获取 OpenList 最新版本
       - name: 获取 OpenList 最新版本
         id: get_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          API_URL: https://api.github.com/repos/OpenListTeam/OpenList/releases/latest
+          API_URL: https://api.github.com/repos/Yxiguan/OpenList_123/releases/latest
         run: |
-          for i in {1..3}; do
-            RESPONSE=$(curl -s -L -w "\n%{http_code}" -H "Authorization: Bearer $GITHUB_TOKEN" "$API_URL")
-            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-            BODY=$(echo "$RESPONSE" | sed '$d')
-            if [ "$HTTP_CODE" -eq 200 ] && [ -n "$BODY" ]; then
-              echo "成功获取 OpenList Release 数据"
-              echo "$BODY" > latest_release.json
-              break
-            fi
-            echo "尝试 $i 失败，HTTP 状态码: $HTTP_CODE"
-            sleep $((5 * i))
-          done
+          RESPONSE_JSON=$(curl -s -L -H "Authorization: Bearer $GITHUB_TOKEN" "$API_URL")
 
-          if [ ! -f latest_release.json ] || [ ! -s latest_release.json ]; then
-            echo "::error::无法获取 OpenList 版本信息"
+          if [ -z "$RESPONSE_JSON" ] || [ "$(echo "$RESPONSE_JSON" | jq '.message')" != "null" ]; then
+            echo "::error::无法获取 OpenList Release 数据。"
+            echo "API 响应: $RESPONSE_JSON"
             exit 1
           fi
 
-          # 提取版本号
-          VERSION=$(echo "$BODY" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-          if [ -z "$VERSION" ]; then
-            echo "::error::无法提取版本号"
-            cat latest_release.json
+          VERSION=$(echo "$RESPONSE_JSON" | jq -r '.tag_name')
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "::error::无法从 API 响应中提取版本号 (tag_name)"
             exit 1
           fi
 
-          # 生成版本代码（比如 v1.2.3 -> 120）
-          VERSION_CODE=$(echo "$VERSION" | tr -d 'v' | tr -d '.' | awk '{printf "%d%02d", $1, $2}')
-
-          # 提取下载链接
-          ARM_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
-          ARM64_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm64.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
-          CHANGELOG=$(echo "$BODY" | grep '"body":' | sed -E 's/.*"body":\s*"([^"]+)"([,}]).*/\1/' | sed 's/\\"/"/g')
+          VERSION_CODE=$(echo "$VERSION" | tr -d 'v.')
+          CHANGELOG=$(echo "$RESPONSE_JSON" | jq -r '.body')
+          ARM_URL=$(echo "$RESPONSE_JSON" | jq -r '.assets[] | select(.name | contains("openlist-android-arm.tar.gz")) | .browser_download_url')
+          ARM64_URL=$(echo "$RESPONSE_JSON" | jq -r '.assets[] | select(.name | contains("openlist-android-arm64.tar.gz")) | .browser_download_url')
 
           if [ -z "$ARM_URL" ] || [ -z "$ARM64_URL" ]; then
-            echo "::error::无法提取二进制下载链接"
+            echo "::error::无法提取二进制下载链接。请检查上游 Release 的附件文件名是否正确。"
             exit 1
           fi
 
-          # 设置环境变量
           echo "OPENLIST_VERSION=$VERSION" >> $GITHUB_ENV
           echo "OPENLIST_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "OPENLIST_ARM_URL=$ARM_URL" >> $GITHUB_ENV
           echo "OPENLIST_ARM64_URL=$ARM64_URL" >> $GITHUB_ENV
-          echo "OPENLIST_CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+          {
+            echo 'OPENLIST_CHANGELOG<<EOF'
+            echo "$CHANGELOG"
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
 
       # 检查当前模块版本
       - name: 检查当前模块版本
         id: check_version
         run: |
           if [ -f update.json ]; then
-            CURRENT_VERSION=$(grep '"version":' update.json | sed -E 's/.*"version":\s*"([^"]+)".*/\1/')
+            CURRENT_VERSION=$(jq -r '.version' update.json)
             echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
           else
             echo "CURRENT_VERSION=none" >> $GITHUB_ENV
@@ -107,22 +95,17 @@ jobs:
       - name: 同步 OpenList 二进制文件
         if: env.SHOULD_BUILD == 'true'
         run: |
+          mkdir -p OpenList-Magisk
           # 下载并解压 ARM 版本
           curl -L -o openlist-arm.tar.gz "${{ env.OPENLIST_ARM_URL }}"
           tar -xzf openlist-arm.tar.gz
-          mv openlist openlist-arm
+          mv openlist OpenList-Magisk/openlist-arm
           rm -f openlist-arm.tar.gz
-
           # 下载并解压 ARM64 版本
           curl -L -o openlist-arm64.tar.gz "${{ env.OPENLIST_ARM64_URL }}"
           tar -xzf openlist-arm64.tar.gz
-          mv openlist openlist-arm64
+          mv openlist OpenList-Magisk/openlist-arm64
           rm -f openlist-arm64.tar.gz
-
-          # 移动二进制文件到模块目录
-          mv openlist-arm OpenList-Magisk/
-          mv openlist-arm64 OpenList-Magisk/
-
           # 设置权限
           chmod 755 OpenList-Magisk/openlist-arm OpenList-Magisk/openlist-arm64
 
@@ -136,7 +119,7 @@ jobs:
               "version": "${{ env.OPENLIST_VERSION }}",
               "versionCode": ${{ env.OPENLIST_VERSION_CODE }},
               "zipUrl": "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ env.OPENLIST_VERSION }}/openlist-magisk-${{ env.OPENLIST_VERSION }}.zip",
-              "changelog": "${{ github.server_url }}/${{ github.repository }}/raw/main/OpenList-Magisk/CHANGELOG.md"
+              "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }
           EOF
 
@@ -148,12 +131,15 @@ jobs:
             echo "::error::module.prop 文件不存在"
             exit 1
           fi
+          
+          # 创建 CHANGELOG.md
+          echo -e "${{ env.OPENLIST_CHANGELOG }}" > CHANGELOG.md
 
           # 提交更改
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add update.json OpenList-Magisk/module.prop
-          git commit -m "更新模块到 OpenList ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update.json OpenList-Magisk/module.prop CHANGELOG.md
+          git commit -m "feat: 更新模块到 OpenList ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
           git push origin main
 
       # 打包模块
@@ -161,7 +147,7 @@ jobs:
         if: env.SHOULD_BUILD == 'true'
         run: |
           cd OpenList-Magisk
-          zip -r ../openlist-magisk-${{ env.OPENLIST_VERSION }}.zip .
+          zip -r9 ../openlist-magisk-${{ env.OPENLIST_VERSION }}.zip .
           cd ..
 
       # 创建 Release
@@ -172,7 +158,7 @@ jobs:
         run: |
           gh release create "${{ env.OPENLIST_VERSION }}" \
             --title "OpenList Magisk Module ${{ env.OPENLIST_VERSION }}" \
-            --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n${{ env.OPENLIST_CHANGELOG }}" \
+            --notes-file CHANGELOG.md \
             --draft=false \
             --prerelease=false \
             "openlist-magisk-${{ env.OPENLIST_VERSION }}.zip"
@@ -181,4 +167,4 @@ jobs:
       - name: 清理临时文件
         if: always()
         run: |
-          rm -rf openlist-magisk-*.zip openlist-arm*.tar.gz latest_release.json
+          rm -f openlist-magisk-*.zip CHANGELOG.md
