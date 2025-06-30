@@ -161,7 +161,7 @@ jobs:
         if: env.SHOULD_BUILD == 'true'
         run: |
           cd OpenList-Magisk
-          zip -r ../openlist-magisk-${{ env.OPENLIST_VERSION }}.zip .
+          zip -r ../openlist-magisk_123-${{ env.OPENLIST_VERSION }}.zip .
           cd ..
 
       # 创建 Release
