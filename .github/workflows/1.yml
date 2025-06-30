@@ -172,7 +172,7 @@ jobs:
         run: |
           gh release create "${{ env.OPENLIST_VERSION }}" \
             --title "OpenList Magisk Module ${{ env.OPENLIST_VERSION }}" \
-            --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n${{ env.OPENLIST_CHANGELOG }}" \
+            --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n$(echo "${{ env.OPENLIST_CHANGELOG }}" | sed -E 's/.*: "([^"]+)".*/\1/')" \
             --draft=false \
             --prerelease=false \
             "openlist-magisk-${{ env.OPENLIST_VERSION }}.zip"
