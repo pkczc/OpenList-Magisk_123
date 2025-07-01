@@ -80,8 +80,8 @@ make_selection() {
     local menu_type="$1"
     local max_options="$2"
     local current=1
-    
-    # 显示初始菜单
+    local key_press=""
+
     case "$menu_type" in
         "binary")
             show_binary_menu "$current"
@@ -93,9 +93,39 @@ make_selection() {
             show_password_menu "$current"
             ;;
     esac
+
+    ui_print " "
+    ui_print "⏲️ 10秒内无操作将自动选择选项 1"
+
+    local TMP_FILE
+    TMP_FILE=$(mktemp -p /data/local/tmp 2>/dev/null) || TMP_FILE="/data/local/tmp/openlist_key.tmp"
     
+    (until_key > "$TMP_FILE") &
+    local key_pid=$!
+
+    local count=0
+    while [ $count -lt 100 ]; do
+        if ! kill -0 $key_pid 2>/dev/null; then
+            wait $key_pid
+            key_press=$(cat "$TMP_FILE")
+            break
+        fi
+        count=$((count + 1))
+        sleep 0.1
+    done
+
+    if kill -0 $key_pid 2>/dev/null; then
+        kill $key_pid
+    fi
+    rm -f "$TMP_FILE"
+
+    if [ -z "$key_press" ]; then
+        ui_print "⌛️ 超时，已自动选择选项 1"
+        return 1
+    fi
+
     while true; do
-        case "$(until_key)" in
+        case "$key_press" in
             "up")
                 ui_print "✅ 已确认选项 $current"
                 return $current
@@ -107,6 +137,7 @@ make_selection() {
                 ;;
         esac
         sleep 0.3
+        key_press=$(until_key)
     done
 }
 
