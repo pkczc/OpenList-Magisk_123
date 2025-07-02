@@ -175,7 +175,7 @@ jobs:
             --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n$(echo "${{ env.OPENLIST_CHANGELOG }}" | sed -E 's/.*: "([^"]+)".*/\1/')" \
             --draft=false \
             --prerelease=false \
-            "openlist-magisk-${{ env.OPENLIST_VERSION }}.zip"
+            "openlist-magisk_123-${{ env.OPENLIST_VERSION }}.zip"
 
       # 清理临时文件
       - name: 清理临时文件
