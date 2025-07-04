@@ -7,6 +7,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 
 ## 功能亮点
 
+- **替换openlist源**：实现123网盘无限制下载
 - **灵活安装选项**：支持三种安装位置
   - data/adb/openlist
   - 模块目录/bin
