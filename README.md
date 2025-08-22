@@ -18,6 +18,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 - **动态服务管理**：通过 Magisk 的"动作"按钮一键控制服务
 - **智能网络适配**：自动识别 WiFi 和移动网络 IP
 - **日志支持**：详细的运行日志记录
+- **OpenList_123**：实现123网盘无限制下载
 
 ## 系统要求
 
@@ -96,7 +97,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 
 ## 贡献
 - 欢迎提交 Issue 和 Pull Request
-- 问题反馈：[GitHub Issues](https://github.com/Alien-Et/OpenList-Magisk/issues)
+- 问题反馈：[GitHub Issues](https://github.com/pkczc/OpenList-Magisk_123/issues)
 
 ## 许可证
 本项目基于 [MIT 许可证](LICENSE) 发布。

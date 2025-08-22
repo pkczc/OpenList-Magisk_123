@@ -32,7 +32,7 @@ jobs:
         id: get_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          API_URL: https://api.github.com/repos/OpenListTeam/OpenList/releases/latest
+          API_URL: https://api.github.com/repos/Yxiguan/OpenList_123/releases/latest
         run: |
           for i in {1..3}; do
             RESPONSE=$(curl -s -L -w "\n%{http_code}" -H "Authorization: Bearer $GITHUB_TOKEN" "$API_URL")
@@ -135,8 +135,8 @@ jobs:
           {
               "version": "${{ env.OPENLIST_VERSION }}",
               "versionCode": ${{ env.OPENLIST_VERSION_CODE }},
-              "zipUrl": "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ env.OPENLIST_VERSION }}/openlist-ksu-${{ env.OPENLIST_VERSION }}.zip",
-              "changelog": "${{ github.server_url }}/${{ github.repository }}/raw/main/OpenList-KernelSU/CHANGELOG.md"
+              "zipUrl": "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ env.OPENLIST_VERSION }}/openlist-ksu_123-${{ env.OPENLIST_VERSION }}.zip",
+              "changelog": "https://github.com/Alien-Et/OpenList-Magisk/raw/main/OpenList-KernelSU/CHANGELOG.md"
           }
           EOF
 
@@ -161,7 +161,7 @@ jobs:
         if: env.SHOULD_BUILD == 'true'
         run: |
           cd OpenList-KernelSU
-          zip -r ../openlist-ksu-${{ env.OPENLIST_VERSION }}.zip .
+          zip -r ../openlist-ksu_123-${{ env.OPENLIST_VERSION }}.zip .
           cd ..
 
       # 创建 Release
@@ -171,14 +171,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ env.OPENLIST_VERSION }}" \
-            --title "OpenList KernelSU Module ${{ env.OPENLIST_VERSION }}" \
+            --title "OpenList KernelSU 123 Module ${{ env.OPENLIST_VERSION }}" \
             --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n${{ env.OPENLIST_CHANGELOG }}" \
             --draft=false \
             --prerelease=false \
-            "openlist-ksu-${{ env.OPENLIST_VERSION }}.zip"
+            "openlist-ksu_123-${{ env.OPENLIST_VERSION }}.zip"
 
       # 清理临时文件
       - name: 清理临时文件
         if: always()
         run: |
-          rm -rf openlist-ksu-*.zip openlist-arm*.tar.gz latest_release.json
+          rm -rf openlist-ksu_123-*.zip openlist-arm*.tar.gz latest_release.json
