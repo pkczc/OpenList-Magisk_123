@@ -39,8 +39,8 @@ until_key() {
 show_binary_menu() {
     local current=$1
     ui_print " "
-    ui_print "📂 选择安装位置"
-    ui_print "1、adb/openlist/bin"
+    ui_print "📂 选择安装位置 (默认: 1)"
+    ui_print "1、data/adb/openlist/bin"
     ui_print "2、$MODDIR/bin"
     ui_print "3、$MODDIR/system/bin"
     ui_print "━━━━━━━━━━━━━━━━━━━━━━"
@@ -52,7 +52,7 @@ show_binary_menu() {
 show_data_menu() {
     local current=$1
     ui_print " "
-    ui_print "📁 选择数据目录"
+    ui_print "📁 选择数据目录 (默认: 1)"
     ui_print "1、data/adb/openlist"
     ui_print "2、Android/openlist"
     ui_print "━━━━━━━━━━━━━━━━━━━━━━"
@@ -64,7 +64,7 @@ show_data_menu() {
 show_password_menu() {
     local current=$1
     ui_print " "
-    ui_print "🔐 初始密码设置"
+    ui_print "🔐 初始密码设置 (默认: 1)"
     ui_print "询问是否修改初始密码为admin？"
     ui_print "（后续请到管理面板自行修改）"
     ui_print "1、不修改"
@@ -75,27 +75,63 @@ show_password_menu() {
     ui_print "👉 当前选择：选项 $current"
 }
 
-# 选择函数
+# 选择函数 with timeout
 make_selection() {
     local menu_type="$1"
     local max_options="$2"
-    local current=1
-    
-    # 显示初始菜单
+    local default_option=1 # Default option is always 1
+    local current=$default_option
+
+    # Display initial menu
     case "$menu_type" in
-        "binary")
-            show_binary_menu "$current"
-            ;;
-        "data")
-            show_data_menu "$current"
-            ;;
-        "password")
-            show_password_menu "$current"
-            ;;
+        "binary") show_binary_menu "$current" ;;
+        "data") show_data_menu "$current" ;;
+        "password") show_password_menu "$current" ;;
     esac
-    
+
+    local key_input=""
+    local countdown=10
+
+    ui_print " "
+    ui_print "将在 $countdown 秒后自动选择默认选项 (选项 $default_option)..."
+
+    # Use a temporary file for IPC between background process and this script
+    local KEY_FILE="/data/local/tmp/key_input.$$"
+    rm -f "$KEY_FILE"
+
+    # Start the key listener in the background. It will write 'up' or 'down' to the file and exit.
+    ( until_key > "$KEY_FILE" ) &
+    local listener_pid=$!
+
+    # Wait for up to 10 seconds, checking for the result file each second
+    while [ $countdown -gt 0 ]; do
+        if [ -s "$KEY_FILE" ]; then
+            # File has content, meaning a key was pressed
+            key_input=$(cat "$KEY_FILE")
+            break
+        fi
+        sleep 1
+        countdown=$((countdown - 1))
+    done
+
+    # Cleanup: kill the listener process and remove the temp file
+    # This ensures no stray processes are left.
+    kill $listener_pid 2>/dev/null
+    wait $listener_pid 2>/dev/null
+    rm -f "$KEY_FILE"
+
+    # If key_input is still empty, it means we timed out
+    if [ -z "$key_input" ]; then
+        ui_print "⌛️ 超时，自动选择默认选项 $default_option"
+        return $default_option
+    fi
+
+    # A key was pressed. Enter the interactive selection loop.
+    # The first key press is already in $key_input.
+    ui_print " "
+    ui_print "已检测到按键，进入手动选择模式。"
     while true; do
-        case "$(until_key)" in
+        case "$key_input" in
             "up")
                 ui_print "✅ 已确认选项 $current"
                 return $current
@@ -103,12 +139,19 @@ make_selection() {
             "down")
                 current=$((current + 1))
                 [ $current -gt $max_options ] && current=1
-                ui_print "👉 当前选择：选项 $current"
+                # Show the menu again with the updated selection
+                case "$menu_type" in
+                    "binary") show_binary_menu "$current" ;;
+                    "data") show_data_menu "$current" ;;
+                    "password") show_password_menu "$current" ;;
+                esac
                 ;;
         esac
-        sleep 0.3
+        # Wait for the next key press (blocking)
+        key_input=$(until_key)
     done
 }
+
 
 # 安装流程开始
 ui_print "⚙️ 开始配置..."
@@ -119,15 +162,15 @@ INSTALL_OPTION=$?
 
 # 定义安装路径和service.sh中的路径
 case $INSTALL_OPTION in
-    1) 
+    1)
         BINARY_PATH="/data/adb/openlist/bin"
         BINARY_SERVICE_PATH="/data/adb/openlist/bin/openlist"  # 绝对路径
         ;;
-    2) 
+    2)
         BINARY_PATH="$MODPATH/bin"
         BINARY_SERVICE_PATH="\$MODDIR/bin/openlist"  # 使用 MODDIR 变量
         ;;
-    3) 
+    3)
         BINARY_PATH="$MODPATH/system/bin"
         BINARY_SERVICE_PATH="\$MODDIR/system/bin/openlist"  # 使用 MODDIR 变量
         ;;
@@ -184,7 +227,7 @@ if [ -f "$MODPATH/service.sh" ]; then
     # 仅替换占位符，保留其他所有内容
     sed -i "s|^DATA_DIR=.*|DATA_DIR=\"$DATA_DIR\"|" "$MODPATH/service.sh"
     sed -i "s|^OPENLIST_BINARY=.*|OPENLIST_BINARY=\"$BINARY_SERVICE_PATH\"|" "$MODPATH/service.sh"
-    
+
     # 验证更新是否成功
     if grep -q "^OPENLIST_BINARY=\"$BINARY_SERVICE_PATH\"" "$MODPATH/service.sh" && \
        grep -q "^DATA_DIR=\"$DATA_DIR\"" "$MODPATH/service.sh"; then
@@ -200,7 +243,7 @@ fi
 ui_print " "
 ui_print "✨ 安装完成"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━"
-ui_print "📍 二进制: $BINARY_PATH$BINARY_NAME"
+ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
 ui_print "📁 数据目录: $DATA_DIR"
 
 # 选择是否修改密码
@@ -210,33 +253,33 @@ PASSWORD_OPTION=$?
 if [ "$PASSWORD_OPTION" = "2" ]; then
     ui_print " "
     ui_print "🔄 正在修改初始密码..."
-    
+
     # 使用绝对路径执行命令
     COMMAND_SUCCESS=0
     case $INSTALL_OPTION in
-        1) 
+        1)
             # 二进制文件在 /data/adb/openlist/bin
             /data/adb/openlist/bin/openlist admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
-        2) 
+        2)
             # 二进制文件在$MODDIR/bin
             "$MODPATH/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
-        3) 
+        3)
             # 二进制文件在 $MODDIR/system/bin/
             "$MODPATH/system/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
     esac
-    
+
     if [ $COMMAND_SUCCESS -eq 0 ]; then
         ui_print "✅ 密码已修改为：admin"
-        
+
         # 确保数据目录存在
         mkdir -p "$DATA_DIR"
-        
+
         # 写入密码到初始密码.txt
         if echo "admin" > "$DATA_DIR/初始密码.txt"; then
             ui_print "✅ 已将密码保存到：$DATA_DIR/初始密码.txt"
