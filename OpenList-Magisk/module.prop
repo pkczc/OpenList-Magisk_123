@@ -1,7 +1,7 @@
 id=openlist_123
 name=OpenList Magisk 123 Module
-version=v4.1.2
-versionCode=41200
+version=v4.1.3
+versionCode=41300
 author=Alien-Et(泡苦茶籽茶二改)
 description=【已停止】请点击"操作"启动程序。项目地址：https://github.com/pkczc/OpenList-Magisk_123
 updateJson=https://raw.githubusercontent.com/pkczc/OpenList-Magisk_123/main/update.json
