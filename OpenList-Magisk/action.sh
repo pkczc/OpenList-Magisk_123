@@ -8,11 +8,7 @@ SERVICE_SH="$MODDIR/service.sh"
 REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
 
 check_openlist_status() {
-    if pgrep -f openlist >/dev/null; then
-        return 0
-    else
-        return 1
-    fi
+    pgrep -f '/data/adb/openlist/bin/openlist server' >/dev/null
 }
 
 update_module_prop_stopped() {
