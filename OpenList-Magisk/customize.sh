@@ -215,7 +215,7 @@ fi
 ui_print " "
 ui_print "✨ 安装完成"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━"
-ui_print "📍 二进制: $BINARY_PATH$BINARY_NAME"
+ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
 ui_print "📁 数据目录: $DATA_DIR"
 
 # 选择是否修改密码
