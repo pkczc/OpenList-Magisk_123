@@ -215,7 +215,19 @@ fi
 ui_print " "
 ui_print "✨ 安装完成"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━"
-ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
+
+# 根据安装选项显示友好的二进制路径
+case $INSTALL_OPTION in
+    1) 
+        ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
+        ;;
+    2) 
+        ui_print "📍 二进制: 模块目录/bin/openlist"
+        ;;
+    3) 
+        ui_print "📍 二进制: 模块目录/system/bin/openlist"
+        ;;
+esac
 ui_print "📁 数据目录: $DATA_DIR"
 
 # 选择是否修改密码
@@ -235,12 +247,12 @@ if [ "$PASSWORD_OPTION" = "2" ]; then
             COMMAND_SUCCESS=$?
             ;;
         2) 
-            # 二进制文件在$MODDIR/bin
+            # 二进制文件在模块目录/bin
             "$MODROOT/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
         3) 
-            # 二进制文件在 $MODDIR/system/bin/
+            # 二进制文件在模块目录/system/bin/
             "$MODROOT/system/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
