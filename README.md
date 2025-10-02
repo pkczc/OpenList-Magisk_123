@@ -1,4 +1,4 @@
-# OpenList Magisk 模块
+# OpenList Magisk(兼容KSU) 模块
 
 [![Release](https://img.shields.io/github/v/release/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/releases)
 [![License](https://img.shields.io/github/license/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/blob/main/LICENSE)
