@@ -66,7 +66,7 @@ jobs:
           # 提取下载链接
           ARM_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
           ARM64_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm64.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
-          CHANGELOG=$(echo "$BODY" | grep '"body":' | sed -E 's/.*"body":\s*"([^"]+)"([,}]).*/\1/' | sed 's/\\"/"/g')
+          CHANGELOG=$(echo "$BODY" | grep -o '"body":\s*"[^"]*"' | sed -E 's/.*"body":\s*"(.*)"/\1/')
 
           if [ -z "$ARM_URL" ] || [ -z "$ARM64_URL" ]; then
             echo "::error::无法提取二进制下载链接"
