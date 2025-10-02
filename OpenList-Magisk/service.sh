@@ -20,7 +20,11 @@ log() {
 }
 
 get_lan_ip() {
-    BUSYBOX="/data/adb/magisk/busybox"
+    if [ "$KSU" = "true" ]; then
+      BUSYBOX="/data/adb/ksu/bin/busybox"
+    else
+      BUSYBOX="/data/adb/magisk/busybox"
+    fi
     if [ -x "$BUSYBOX" ]; then
         IP_CMD="$BUSYBOX ip"
         IFCONFIG_CMD="$BUSYBOX ifconfig"
@@ -64,7 +68,11 @@ get_lan_ip() {
 
 get_port() {
     pid=$1
-    BUSYBOX="/data/adb/magisk/busybox"
+    if [ "$KSU" = "true" ]; then
+      BUSYBOX="/data/adb/ksu/bin/busybox"
+    else
+      BUSYBOX="/data/adb/magisk/busybox"
+    fi
     if [ -x "$BUSYBOX" ]; then
         GREP_CMD="$BUSYBOX grep"
         AWK_CMD="$BUSYBOX awk"

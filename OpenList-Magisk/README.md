@@ -1,6 +1,6 @@
 # OpenList Magisk 模块
 
-[![Release](https://img.shields.io/github/v/release/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/releases)
+[![Release](https://img.shields.io/github/v/release/pkczc/OpenList-Magisk_123)](https://github.com/pkczc/OpenList-Magisk_123/releases)
 [![License](https://img.shields.io/github/license/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/blob/main/LICENSE)
 
 OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) 文件服务器集成到 Android 系统中，通过 Magisk 以系统化方式运行，支持 ARM 和 ARM64 架构。
@@ -28,7 +28,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 ## 安装步骤
 
 1. **下载模块**
-   - 从 [GitHub Releases](https://github.com/Alien-Et/OpenList-Magisk/releases) 下载最新版本
+   - 从 [GitHub Releases](https://github.com/pkczc/OpenList-Magisk_123/releases) 下载最新版本
 
 2. **安装配置**
    - 打开 Magisk 管理器

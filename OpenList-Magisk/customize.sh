@@ -1,5 +1,15 @@
 # shellcheck shell=ash
 
+if [ "$KSU" = "true" ] || ! command -v ui_print >/dev/null 2>&1; then
+  ui_print() {
+    echo "$1"
+  }
+  abort() {
+    ui_print "Error: $1"
+    exit 1
+  }
+fi
+
 ui_print "正在安装 OpenList Magisk 模块..."
 
 # 检测设备架构

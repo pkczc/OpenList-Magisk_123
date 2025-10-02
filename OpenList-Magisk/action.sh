@@ -5,7 +5,7 @@
 MODDIR="${0%/*}"
 MODULE_PROP="$MODDIR/module.prop"
 SERVICE_SH="$MODDIR/service.sh"
-REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
+REPO_URL="https://github.com/pkczc/OpenList-Magisk_123"
 
 check_openlist_status() {
     if pgrep -f openlist >/dev/null; then
