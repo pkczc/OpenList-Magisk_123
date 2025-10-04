@@ -1,7 +1,7 @@
 id=openlist
-name=OpenList Magisk Module
-version=v4.1.3
-versionCode=41300
+name=OpenList (Magisk/KernelSU)
+version=v4.1.4
+versionCode=41400
 author=Alien-Et
 description=【已停止】请点击"操作"启动程序。项目地址：https://github.com/Alien-Et/OpenList-Magisk
 updateJson=https://raw.githubusercontent.com/Alien-Et/OpenList-Magisk/main/update.json

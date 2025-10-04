@@ -3,12 +3,26 @@
 # service.sh for OpenList Magisk Module
 
 MODDIR="${0%/*}"
-DATA_DIR="/data/adb/openlist/"
-OPENLIST_BINARY="$MODDIR/system/bin/openlist"
+DATA_DIR="__PLACEHOLDER_DATA_DIR__"
+OPENLIST_BINARY="__PLACEHOLDER_BINARY_PATH__"
 MODULE_PROP_FILE="$MODDIR/module.prop"
 LOG_FILE="$MODDIR/service.log"
 TEMP_IP_FILE="$MODDIR/ip_result.tmp"
 TEMP_PORT_FILE="$MODDIR/port_result.tmp"
+
+# 查找可用的busybox路径，兼容Magisk和KSU
+toast_find_busybox() {
+    # 检查多个可能的busybox路径，按优先级排序
+    if [ -x "/data/adb/magisk/busybox" ]; then
+        echo "/data/adb/magisk/busybox"
+    elif [ -x "/data/adb/ksu/bin/busybox" ]; then
+        echo "/data/adb/ksu/bin/busybox"
+    elif command -v busybox >/dev/null; then
+        echo "$(command -v busybox)"
+    else
+        echo ""
+    fi
+}
 
 log() {
     # 日志轮转（限制日志文件大小，例如 1MB）
@@ -20,7 +34,8 @@ log() {
 }
 
 get_lan_ip() {
-    BUSYBOX="/data/adb/magisk/busybox"
+    # 使用通用的busybox查找函数
+    BUSYBOX=$(toast_find_busybox)
     if [ -x "$BUSYBOX" ]; then
         IP_CMD="$BUSYBOX ip"
         IFCONFIG_CMD="$BUSYBOX ifconfig"
@@ -64,7 +79,8 @@ get_lan_ip() {
 
 get_port() {
     pid=$1
-    BUSYBOX="/data/adb/magisk/busybox"
+    # 使用通用的busybox查找函数
+    BUSYBOX=$(toast_find_busybox)
     if [ -x "$BUSYBOX" ]; then
         GREP_CMD="$BUSYBOX grep"
         AWK_CMD="$BUSYBOX awk"
