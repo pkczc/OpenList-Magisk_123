@@ -9,7 +9,7 @@ REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
 
 check_openlist_status() {
     for bf in /data/adb/openlist/bin/openlist \
-              /bin/openlist \
+              $MODDIR/bin/openlist \
               /system/bin/openlist
     do
         pgrep -f "${bf} server" >/dev/null && return 0
