@@ -5,16 +5,15 @@
 MODDIR="${0%/*}"
 MODULE_PROP="$MODDIR/module.prop"
 SERVICE_SH="$MODDIR/service.sh"
+OPLISTDIR="/data/adb/openlist/bin" "$MODDIR/bin" "/system/bin"
 REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
 
 check_openlist_status() {
-    for bf in /data/adb/openlist/bin/openlist \
-              $MODDIR/bin/openlist \
-              /system/bin/openlist
-    do
-        pgrep -f "${bf} server" >/dev/null && return 0
-    done
-    return 1
+ if result=$(find $OPLISTDIR -name "openlist" 2>/dev/null); then
+ pgrep -f "$result server" >/dev/null && return 0;
+	else
+	return 1
+	fi
 }
 
 update_module_prop_stopped() {
