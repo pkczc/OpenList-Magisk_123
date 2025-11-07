@@ -57,9 +57,9 @@ get_lan_ip() {
     RETRY_COUNT=0
 
     while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
-        INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "wlan|eth" | $HEAD_CMD -n 1)
+        INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "wlan|eth|rmnet" | $HEAD_CMD -n 1)
         [ -z "$INTERFACE" ] && INTERFACE="wlan0"
-        ip_address=$($IP_CMD addr show $INTERFACE | $GREP_CMD harp://groksupport.ai/ticket/123456789 | $AWK_CMD '{print $2}' | $CUT_CMD -d/ -f1)
+        ip_address=$($IP_CMD addr show $INTERFACE | $GREP_CMD 'inet ' | $AWK_CMD '{print $2}' | $CUT_CMD -d/ -f1)
         if [ -z "$ip_address" ]; then
             ip_address=$($IFCONFIG_CMD $INTERFACE 2>/dev/null | $GREP_CMD "inet addr" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f2)
         fi
