@@ -57,6 +57,17 @@ get_lan_ip() {
     RETRY_COUNT=0
 
     while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
+        # 新增：检测是否有活跃的Wi-Fi接口（wlan开头且state UP）
+        WLAN_INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "^wlan" | $HEAD_CMD -n 1)
+        
+        if [ -z "$WLAN_INTERFACE" ]; then
+            # 无活跃Wi-Fi，判定为移动数据环境，返回localhost
+            log "未检测到活跃的Wi-Fi连接，使用移动数据模式"
+            echo "localhost" > "$TEMP_IP_FILE"
+            return 0
+        fi
+
+        # 原有逻辑：Wi-Fi已连接，获取局域网IP
         INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "wlan|eth|rmnet" | $HEAD_CMD -n 1)
         [ -z "$INTERFACE" ] && INTERFACE="wlan0"
         ip_address=$($IP_CMD addr show $INTERFACE | $GREP_CMD 'inet ' | $AWK_CMD '{print $2}' | $CUT_CMD -d/ -f1)
