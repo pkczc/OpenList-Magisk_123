@@ -1,25 +1,26 @@
 #!/system/bin/sh
 # shellcheck shell=ash
 # action.sh for OpenList Magisk Module
-
 MODDIR="${0%/*}"
 MODULE_PROP="$MODDIR/module.prop"
 SERVICE_SH="$MODDIR/service.sh"
-OPLISTDIR="/data/adb/openlist/bin" "$MODDIR/bin" "/system/bin"
+# 修复：用空格分隔3个路径，作为查找范围（原代码意图应为遍历这3个目录找openlist）
+OPLISTDIR="/data/adb/openlist/bin $MODDIR/bin /system/bin"
 REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
-
+# 适配：修改find命令，支持多路径查找
 check_openlist_status() {
-    if result=$(find $OPLISTDIR -name "openlist" 2>/dev/null); then
-        pgrep -f "$result server" >/dev/null && return 0;
-    else
-        return 1
-    fi
+    # 遍历OPLISTDIR中的所有路径，逐个查找openlist
+    for dir in $OPLISTDIR; do
+        result=$(find "$dir" -name "openlist" 2>/dev/null)
+        if [ -n "$result" ] && pgrep -f "$result server" >/dev/null; then
+            return 0
+        fi
+    done
+    return 1
 }
-
 update_module_prop_stopped() {
     sed -i "s|^description=.*|description=【已停止】请点击\"操作\"启动程序。项目地址：${REPO_URL}|" "$MODULE_PROP"
 }
-
 if check_openlist_status; then
     pkill -f openlist
     sleep 1
