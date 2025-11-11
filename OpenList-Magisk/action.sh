@@ -4,26 +4,60 @@
 MODDIR="${0%/*}"
 MODULE_PROP="$MODDIR/module.prop"
 SERVICE_SH="$MODDIR/service.sh"
-# 修复：用空格分隔3个路径，作为查找范围（原代码意图应为遍历这3个目录找openlist）
-OPLISTDIR="/data/adb/openlist/bin $MODDIR/bin /system/bin"
+OPLISTDIR="/data/adb/openlist/bin:$MODDIR/bin:/system/bin"
 REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
-# 适配：修改find命令，支持多路径查找
-check_openlist_status() {
-    # 遍历OPLISTDIR中的所有路径，逐个查找openlist
-    for dir in $OPLISTDIR; do
-        result=$(find "$dir" -name "openlist" 2>/dev/null)
-        if [ -n "$result" ] && pgrep -f "$result server" >/dev/null; then
+
+# 修复：用字符串替代数组，适配 Ash Shell（不支持数组）
+find_busybox() {
+    # 用空格分隔路径字符串，后续用for循环遍历
+    local busybox_paths="/data/adb/magisk/busybox /data/adb/ksu/bin/busybox /data/adb/bin/busybox /system/xbin/busybox /system/bin/busybox"
+    
+    for path in $busybox_paths; do
+        if [ -x "$path" ]; then
+            echo "$path"
             return 0
         fi
     done
-    return 1
+
+    # Fallback：通过which查找
+    local which_busybox
+    which_busybox=$(which busybox 2>/dev/null)
+    if [ -x "$which_busybox" ]; then
+        echo "$which_busybox"
+        return 0
+    fi
+
+    # 未找到BusyBox，报错退出
+    echo "错误:找不到BusyBox！" >&2
+    exit 1
 }
+
+# 初始化BusyBox绝对路径
+BUSYBOX=$(find_busybox)
+
+# 核心函数：检查OpenList服务状态
+check_openlist_status() {
+    IFS=':'  # 按冒号分隔OPLISTDIR中的3个路径
+    for dir in $OPLISTDIR; do
+        result=$("$BUSYBOX" find "$dir" -name "openlist" 2>/dev/null)
+        if [ -n "$result" ] && "$BUSYBOX" pgrep -f "$result server" >/dev/null; then
+            return 0  # 找到并运行中，返回成功
+        fi
+    done
+    unset IFS  # 恢复默认分隔符
+    return 1  # 未找到或未运行，返回失败
+}
+
+# 更新模块状态为“已停止”
 update_module_prop_stopped() {
-    sed -i "s|^description=.*|description=【已停止】请点击\"操作\"启动程序。项目地址：${REPO_URL}|" "$MODULE_PROP"
+    "$BUSYBOX" sed -i "s|^description=.*|description=【已停止】请点击\"操作\"启动程序。项目地址：${REPO_URL}|" "$MODULE_PROP"
 }
+
+# 主逻辑：启停服务
 if check_openlist_status; then
-    pkill -f openlist
-    sleep 1
+    # 服务已运行：执行停止
+    "$BUSYBOX" pkill -f openlist
+    sleep 1  # 等待进程终止
     if check_openlist_status; then
         echo "无法停止 OpenList 服务"
         exit 1
@@ -32,9 +66,10 @@ if check_openlist_status; then
         update_module_prop_stopped
     fi
 else
+    # 服务未运行：执行启动
     if [ -f "$SERVICE_SH" ]; then
         sh "$SERVICE_SH"
-        sleep 1
+        sleep 1  # 等待服务启动
         if check_openlist_status; then
             echo "OpenList 服务启动成功"
         else
