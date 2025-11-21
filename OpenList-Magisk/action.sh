@@ -4,7 +4,7 @@
 MODDIR="${0%/*}"
 MODULE_PROP="$MODDIR/module.prop"
 SERVICE_SH="$MODDIR/service.sh"
-OPLISTDIR="/data/adb/openlist/bin:$MODDIR/bin:/system/bin"
+OPENLIST_BINARY="__PLACEHOLDER_BINARY_PATH__"
 REPO_URL="https://github.com/Alien-Et/OpenList-Magisk"
 
 # 修复：用字符串替代数组，适配 Ash Shell（不支持数组）
@@ -37,14 +37,10 @@ BUSYBOX=$(find_busybox)
 
 # 核心函数：检查OpenList服务状态
 check_openlist_status() {
-    IFS=':'  # 按冒号分隔OPLISTDIR中的3个路径
-    for dir in $OPLISTDIR; do
-        result=$("$BUSYBOX" find "$dir" -name "openlist" 2>/dev/null)
-        if [ -n "$result" ] && "$BUSYBOX" pgrep -f "$result server" >/dev/null; then
-            return 0  # 找到并运行中，返回成功
+        if "$BUSYBOX" pgrep -f "$OPENLIST_BINARY server" 2>/dev/null; then
+            return 0  # 找到并运行中，返回成功，并打印出pid
         fi
     done
-    unset IFS  # 恢复默认分隔符
     return 1  # 未找到或未运行，返回失败
 }
 
