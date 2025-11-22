@@ -7,6 +7,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 
 ## 功能亮点
 
+- **替换openlist源**：支持123网盘下载
 - **双框架支持**：同时兼容 Magisk 和 KernelSU
 - **灵活安装选项**：支持三种安装位置
   - data/adb/openlist
