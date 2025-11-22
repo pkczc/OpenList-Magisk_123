@@ -3,12 +3,26 @@
 # service.sh for OpenList Magisk Module
 
 MODDIR="${0%/*}"
-DATA_DIR="/data/adb/openlist/"
-OPENLIST_BINARY="$MODDIR/system/bin/openlist"
+DATA_DIR="__PLACEHOLDER_DATA_DIR__"
+OPENLIST_BINARY="__PLACEHOLDER_BINARY_PATH__"
 MODULE_PROP_FILE="$MODDIR/module.prop"
 LOG_FILE="$MODDIR/service.log"
 TEMP_IP_FILE="$MODDIR/ip_result.tmp"
 TEMP_PORT_FILE="$MODDIR/port_result.tmp"
+
+# 查找可用的busybox路径，兼容Magisk和KSU
+toast_find_busybox() {
+    # 检查多个可能的busybox路径，按优先级排序
+    if [ -x "/data/adb/magisk/busybox" ]; then
+        echo "/data/adb/magisk/busybox"
+    elif [ -x "/data/adb/ksu/bin/busybox" ]; then
+        echo "/data/adb/ksu/bin/busybox"
+    elif command -v busybox >/dev/null; then
+        echo "$(command -v busybox)"
+    else
+        echo ""
+    fi
+}
 
 log() {
     # 日志轮转（限制日志文件大小，例如 1MB）
@@ -20,11 +34,8 @@ log() {
 }
 
 get_lan_ip() {
-    if [ "$KSU" = "true" ]; then
-      BUSYBOX="/data/adb/ksu/bin/busybox"
-    else
-      BUSYBOX="/data/adb/magisk/busybox"
-    fi
+    # 使用通用的busybox查找函数
+    BUSYBOX=$(toast_find_busybox)
     if [ -x "$BUSYBOX" ]; then
         IP_CMD="$BUSYBOX ip"
         IFCONFIG_CMD="$BUSYBOX ifconfig"
@@ -46,9 +57,20 @@ get_lan_ip() {
     RETRY_COUNT=0
 
     while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
-        INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "wlan|eth" | $HEAD_CMD -n 1)
+        # 新增：检测是否有活跃的Wi-Fi接口（wlan开头且state UP）
+        WLAN_INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "^wlan" | $HEAD_CMD -n 1)
+        
+        if [ -z "$WLAN_INTERFACE" ]; then
+            # 无活跃Wi-Fi，判定为移动数据环境，返回localhost
+            log "未检测到活跃的Wi-Fi连接，使用移动数据模式"
+            echo "localhost" > "$TEMP_IP_FILE"
+            return 0
+        fi
+
+        # 原有逻辑：Wi-Fi已连接，获取局域网IP
+        INTERFACE=$($IP_CMD link | $GREP_CMD "state UP" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f1 | $GREP_CMD -E "wlan|eth|rmnet" | $HEAD_CMD -n 1)
         [ -z "$INTERFACE" ] && INTERFACE="wlan0"
-        ip_address=$($IP_CMD addr show $INTERFACE | $GREP_CMD harp://groksupport.ai/ticket/123456789 | $AWK_CMD '{print $2}' | $CUT_CMD -d/ -f1)
+        ip_address=$($IP_CMD addr show $INTERFACE | $GREP_CMD 'inet ' | $AWK_CMD '{print $2}' | $CUT_CMD -d/ -f1)
         if [ -z "$ip_address" ]; then
             ip_address=$($IFCONFIG_CMD $INTERFACE 2>/dev/null | $GREP_CMD "inet addr" | $AWK_CMD '{print $2}' | $CUT_CMD -d: -f2)
         fi
@@ -68,11 +90,8 @@ get_lan_ip() {
 
 get_port() {
     pid=$1
-    if [ "$KSU" = "true" ]; then
-      BUSYBOX="/data/adb/ksu/bin/busybox"
-    else
-      BUSYBOX="/data/adb/magisk/busybox"
-    fi
+    # 使用通用的busybox查找函数
+    BUSYBOX=$(toast_find_busybox)
     if [ -x "$BUSYBOX" ]; then
         GREP_CMD="$BUSYBOX grep"
         AWK_CMD="$BUSYBOX awk"

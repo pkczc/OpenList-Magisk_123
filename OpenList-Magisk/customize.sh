@@ -1,14 +1,14 @@
 # shellcheck shell=ash
 
-if [ "$KSU" = "true" ] || ! command -v ui_print >/dev/null 2>&1; then
-  ui_print() {
-    echo "$1"
-  }
-  abort() {
-    ui_print "Error: $1"
-    exit 1
-  }
+#==== 侦探：Magisk or KernelSU ====
+if [ -n "$MAGISK_VER" ]; then
+    MODROOT="$MODPATH"
+elif [ -n "$KSU" ] || [ -n "$KERNELSU" ]; then
+    MODROOT="$MODULEROOT"
+else
+    MODROOT="$MODPATH"  # 兜底，保持旧逻辑
 fi
+#==== 侦探结束 ====
 
 ui_print "正在安装 OpenList Magisk 模块..."
 
@@ -176,12 +176,12 @@ case $INSTALL_OPTION in
         BINARY_PATH="/data/adb/openlist/bin"
         BINARY_SERVICE_PATH="/data/adb/openlist/bin/openlist"  # 绝对路径
         ;;
-    2)
-        BINARY_PATH="$MODPATH/bin"
+    2) 
+        BINARY_PATH="$MODROOT/bin"
         BINARY_SERVICE_PATH="\$MODDIR/bin/openlist"  # 使用 MODDIR 变量
         ;;
-    3)
-        BINARY_PATH="$MODPATH/system/bin"
+    3) 
+        BINARY_PATH="$MODROOT/system/bin"
         BINARY_SERVICE_PATH="\$MODDIR/system/bin/openlist"  # 使用 MODDIR 变量
         ;;
 esac
@@ -192,17 +192,17 @@ mkdir -p "$BINARY_PATH"
 # 安装二进制文件
 if echo "$ARCH" | grep -q "arm64"; then
     ui_print "📦 安装 ARM64 版本..."
-    if [ -f "$MODPATH/openlist-arm64" ]; then
-        mv "$MODPATH/openlist-arm64" "$BINARY_PATH/$BINARY_NAME"
-        rm -f "$MODPATH/openlist-arm"
+    if [ -f "$MODROOT/openlist-arm64" ]; then
+        mv "$MODROOT/openlist-arm64" "$BINARY_PATH/$BINARY_NAME"
+        rm -f "$MODROOT/openlist-arm"
     else
         abort "❌ 错误：未找到 ARM64 版本文件"
     fi
 else
     ui_print "📦 安装 ARM 版本..."
-    if [ -f "$MODPATH/openlist-arm" ]; then
-        mv "$MODPATH/openlist-arm" "$BINARY_PATH/$BINARY_NAME"
-        rm -f "$MODPATH/openlist-arm64"
+    if [ -f "$MODROOT/openlist-arm" ]; then
+        mv "$MODROOT/openlist-arm" "$BINARY_PATH/$BINARY_NAME"
+        rm -f "$MODROOT/openlist-arm64"
     else
         abort "❌ 错误：未找到 ARM 版本文件"
     fi
@@ -210,7 +210,7 @@ fi
 
 chmod 755 "$BINARY_PATH/$BINARY_NAME"
 
-[ "$BINARY_PATH" = "$MODPATH/system/bin" ] && chcon -R u:object_r:system_file:s0 "$BINARY_PATH/$BINARY_NAME"
+[ "$BINARY_PATH" = "$MODROOT/system/bin" ] && chcon -R u:object_r:system_file:s0 "$BINARY_PATH/$BINARY_NAME"
 
 # 选择数据目录
 make_selection "data" "2"
@@ -232,18 +232,23 @@ ui_print "2. 请手动将现有数据迁移到新目录"
 ui_print "3. 迁移后更新 config.json 中的路径"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━"
 
-# 更新 service.sh
-if [ -f "$MODPATH/service.sh" ]; then
-    # 仅替换占位符，保留其他所有内容
-    sed -i "s|^DATA_DIR=.*|DATA_DIR=\"$DATA_DIR\"|" "$MODPATH/service.sh"
-    sed -i "s|^OPENLIST_BINARY=.*|OPENLIST_BINARY=\"$BINARY_SERVICE_PATH\"|" "$MODPATH/service.sh"
-
-    # 验证更新是否成功
-    if grep -q "^OPENLIST_BINARY=\"$BINARY_SERVICE_PATH\"" "$MODPATH/service.sh" && \
-       grep -q "^DATA_DIR=\"$DATA_DIR\"" "$MODPATH/service.sh"; then
+# 更新 service.sh - 使用占位符替换
+    if [ -f "$MODROOT/service.sh" ]; then
+        # 替换占位符为实际路径
+        sed -i "s|__PLACEHOLDER_BINARY_PATH__|$BINARY_SERVICE_PATH|g" "$MODROOT/service.sh"
+        sed -i "s|__PLACEHOLDER_DATA_DIR__|$DATA_DIR|g" "$MODROOT/service.sh"
+    
+    # 验证更新是否成功 - 检查占位符是否被正确替换
+    if ! grep -q "__PLACEHOLDER_BINARY_PATH__" "$MODROOT/service.sh" && \
+       ! grep -q "__PLACEHOLDER_DATA_DIR__" "$MODROOT/service.sh"; then
         ui_print "✅ 配置更新成功"
     else
-        abort "❌ 配置更新失败"
+        ui_print "❌ 配置更新失败"
+        ui_print "调试信息："
+        ui_print "期望的BINARY路径: $BINARY_SERVICE_PATH"
+        ui_print "期望的DATA路径: $DATA_DIR"
+        ui_print "service.sh中仍然存在未替换的占位符"
+        abort "配置更新验证失败"
     fi
 else
     abort "❌ 错误：未找到 service.sh"
@@ -253,7 +258,19 @@ fi
 ui_print " "
 ui_print "✨ 安装完成"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━"
-ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
+
+# 根据安装选项显示友好的二进制路径
+case $INSTALL_OPTION in
+    1) 
+        ui_print "📍 二进制: $BINARY_PATH/$BINARY_NAME"
+        ;;
+    2) 
+        ui_print "📍 二进制: 模块目录/bin/openlist"
+        ;;
+    3) 
+        ui_print "📍 二进制: 模块目录/system/bin/openlist"
+        ;;
+esac
 ui_print "📁 数据目录: $DATA_DIR"
 
 # 选择是否修改密码
@@ -272,14 +289,14 @@ if [ "$PASSWORD_OPTION" = "2" ]; then
             /data/adb/openlist/bin/openlist admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
-        2)
-            # 二进制文件在$MODDIR/bin
-            "$MODPATH/bin/openlist" admin set admin --data "$DATA_DIR"
+        2) 
+            # 二进制文件在模块目录/bin
+            "$MODROOT/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
-        3)
-            # 二进制文件在 $MODDIR/system/bin/
-            "$MODPATH/system/bin/openlist" admin set admin --data "$DATA_DIR"
+        3) 
+            # 二进制文件在模块目录/system/bin/
+            "$MODROOT/system/bin/openlist" admin set admin --data "$DATA_DIR"
             COMMAND_SUCCESS=$?
             ;;
     esac

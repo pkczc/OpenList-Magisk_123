@@ -1,5 +1,15 @@
 # shellcheck shell=ash
-# uninstall.sh for OpenList Magisk Module
+# uninstall.sh for OpenList Magisk/KSU Module
+
+#==== 侦探：Magisk or KernelSU ====
+if [ -n "$MAGISK_VER" ]; then
+    MODROOT="$MODPATH"
+elif [ -n "$KSU" ] || [ -n "$KERNELSU" ]; then
+    MODROOT="$MODULEROOT"
+else
+    MODROOT="$MODPATH"  # 兜底，保持旧逻辑
+fi
+#==== 侦探结束 ====
 
 # 日志函数
 log() {
@@ -28,15 +38,39 @@ stop_service() {
 # 清理二进制文件
 clean_binaries() {
     local found=0
-    local path="/data/adb/openlist/bin/openlist"
-    if [ -f "$path" ]; then
-        log "正在删除二进制文件：$path"
-        rm -f "$path"
-        found=1
-    fi
+    local paths="/data/adb/openlist/bin/openlist $MODROOT/bin/openlist $MODROOT/system/bin/openlist"
+    
+    for path in $paths; do
+        if [ -f "$path" ]; then
+            log "正在删除二进制文件：$path"
+            rm -f "$path"
+            found=1
+        fi
+    done
     
     if [ $found -eq 0 ]; then
         log "未找到 OpenList 二进制文件"
+    fi
+}
+
+# 自动清理数据目录
+clean_data() {
+    log "开始自动清理数据目录..."
+    local found=0
+    
+    # 清理所有可能的数据目录
+    for dir in "/data/adb/openlist" "/sdcard/Android/openlist"; do
+        if [ -d "$dir" ]; then
+            log "正在删除数据目录：$dir"
+            rm -rf "$dir"
+            found=1
+        fi
+    done
+    
+    if [ $found -eq 1 ]; then
+        log "数据目录清理完成"
+    else
+        log "未找到 OpenList 数据目录"
     fi
 }
 
@@ -49,6 +83,9 @@ main() {
     
     # 清理二进制文件
     clean_binaries
+    
+    # 自动清理数据目录
+    clean_data
     
     log "卸载完成"
     echo "请重启设备以完成卸载"

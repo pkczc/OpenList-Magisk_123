@@ -1,5 +1,15 @@
 # shellcheck shell=ash
-# uninstall.sh for OpenList Magisk Module
+# uninstall.sh for OpenList Magisk/KSU Module
+
+#==== 侦探：Magisk or KernelSU ====
+if [ -n "$MAGISK_VER" ]; then
+    MODROOT="$MODPATH"
+elif [ -n "$KSU" ] || [ -n "$KERNELSU" ]; then
+    MODROOT="$MODULEROOT"
+else
+    MODROOT="$MODPATH"  # 兜底，保持旧逻辑
+fi
+#==== 侦探结束 ====
 
 # 日志函数
 log() {
@@ -28,12 +38,15 @@ stop_service() {
 # 清理二进制文件
 clean_binaries() {
     local found=0
-    local path="/data/adb/openlist/bin/openlist"
-    if [ -f "$path" ]; then
-        log "正在删除二进制文件：$path"
-        rm -f "$path"
-        found=1
-    fi
+    local paths="/data/adb/openlist/bin/openlist $MODROOT/bin/openlist $MODROOT/system/bin/openlist"
+    
+    for path in $paths; do
+        if [ -f "$path" ]; then
+            log "正在删除二进制文件：$path"
+            rm -f "$path"
+            found=1
+        fi
+    done
     
     if [ $found -eq 0 ]; then
         log "未找到 OpenList 二进制文件"
