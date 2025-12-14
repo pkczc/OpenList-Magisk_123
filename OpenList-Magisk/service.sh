@@ -176,10 +176,10 @@ update_module_prop_running() {
         fi
 
         if [ -n "$port" ] && [ "$CURRENT_IP" != "无法获取IP" ]; then
-            NEW_DESC="description=【运行中】当前地址：http://${CURRENT_IP}:${port} | 数据目录：${DATA_DIR} | 点击▲操作关闭程序${PASSWORD_TEXT}"
+            NEW_DESC="description=【运行中】当前地址：http://${CURRENT_IP}:${port} | PID:$pid | 数据目录：${DATA_DIR} | 点击▲操作关闭程序${PASSWORD_TEXT}"
         else
             log "错误: IP 或端口获取失败 (IP: $CURRENT_IP, 端口: $port)"
-            NEW_DESC="description=【运行中】无法检测 openlist 地址（IP: $CURRENT_IP, 端口: $port），请检查日志 $LOG_FILE | 数据目录：${DATA_DIR} | 点击▲操作关闭程序${PASSWORD_TEXT}"
+            NEW_DESC="description=【运行中】无法检测 openlist 地址（IP: $CURRENT_IP, 端口: $port，PID:$pid），请检查日志 $LOG_FILE | 数据目录：${DATA_DIR} | 点击▲操作关闭程序${PASSWORD_TEXT}"
         fi
     fi
 
