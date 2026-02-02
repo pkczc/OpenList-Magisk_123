@@ -72,7 +72,7 @@ jobs:
           ARM64_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm64.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
           
           # 提取 CHANGELOG（使用 Python 处理 JSON）
-          CHANGELOG=$(python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('body', ''))" <<< "$BODY" | sed 's/\\"/"/g')
+          CHANGELOG=$(python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('body', ''))" <<< "$BODY")
 
           if [ -z "$ARM_URL" ] || [ -z "$ARM64_URL" ]; then
             echo "::error::无法提取二进制下载链接"
@@ -80,11 +80,15 @@ jobs:
           fi
 
           # 设置环境变量
-          echo "OPENLIST_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "OPENLIST_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-          echo "OPENLIST_ARM_URL=$ARM_URL" >> $GITHUB_ENV
-          echo "OPENLIST_ARM64_URL=$ARM64_URL" >> $GITHUB_ENV
-          echo "OPENLIST_CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+          {
+            echo "OPENLIST_VERSION=$VERSION"
+            echo "OPENLIST_VERSION_CODE=$VERSION_CODE"
+            echo "OPENLIST_ARM_URL=$ARM_URL"
+            echo "OPENLIST_ARM64_URL=$ARM64_URL"
+            echo "OPENLIST_CHANGELOG<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       # 检查当前模块版本
       - name: 检查当前模块版本
