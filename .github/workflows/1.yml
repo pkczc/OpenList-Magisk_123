@@ -1,24 +1,26 @@
-# Workflow for Release Notes
-name: Release Notes
+# This is the reverted content of the workflow file.
+# Original content prior to commit b1cc5ea03ac55cb150c55a56ed3ad597eafb42da
+
+name: Workflow
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - main
 
 jobs:
-  generate_release_notes:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm test
 
-      - name: Generate Release Notes
-        run: |
-          echo 'Generating release notes...'
-          # Replace this echo command with the actual command to generate release notes.
-
-      - name: Handle Escape Issues
-        run: |
-          echo 'Handling escaping issues for Markdown formatting.'
-          # Add your escaping handling logic here.
+# Additional steps can be added here based on the previous workflow.
