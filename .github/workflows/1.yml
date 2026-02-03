@@ -220,10 +220,14 @@ jobs:
             exit 1
           fi
 
+          # 更新 CHANGELOG.md
+          mkdir -p OpenList-Magisk
+          echo "${{ env.OPENLIST_CHANGELOG }}" > OpenList-Magisk/CHANGELOG.md
+
           # 提交更改
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add update.json OpenList-Magisk/module.prop
+          git add update.json OpenList-Magisk/module.prop OpenList-Magisk/CHANGELOG.md
           git commit -m "更新模块到 OpenList ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
           git push origin main
 
