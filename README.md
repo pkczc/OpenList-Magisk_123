@@ -22,14 +22,9 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 
 ## 截图展示
 
-### 安装界面
-![安装界面](install-interface.jpg)
-
-### KernelSU WiFi 网络
-![KernelSU WiFi 网络](kernelsu-wifi.jpg)
-
-### KernelSU 移动网络
-![KernelSU 移动网络](kernelsu-mobile-network.jpg)
+| 安装界面 | KernelSU WiFi 网络 | KernelSU 移动网络 |
+|---------|------------------|------------------|
+| ![安装界面](install-interface.jpg) | ![KernelSU WiFi 网络](kernelsu-wifi.jpg) | ![KernelSU 移动网络](kernelsu-mobile-network.jpg) |
 
 ## 系统要求
 
