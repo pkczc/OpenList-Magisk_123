@@ -1,40 +1,54 @@
-### 更新日志
+### &nbsp;&nbsp;&nbsp;🚀 Features
 
-##### 2025/11/22 00:12
-##### - 优化安装脚本，在安装时安装脚本会根据用户选择把所选路径统一赋值到service和action，简化了在安装后脚本在每次启动时会同时遍寻3个路径寻找二进制和数据目录的问题。
-##### - magisk/ksu管理器新增PID进程显示
+- **123pan**:
+  - Add offline download &nbsp;-&nbsp; by @mcxiedidi in https://github.com/OpenListTeam/OpenList/issues/1911 [<samp>(642ac)</samp>](https://github.com/OpenListTeam/OpenList/commit/642acf8b)
+- **drivers**:
+  - Support getting disk usage of some drivers &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1905 [<samp>(744db)</samp>](https://github.com/OpenListTeam/OpenList/commit/744dbd5e)
+  - Add autoindex driver &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1978 [<samp>(f0578)</samp>](https://github.com/OpenListTeam/OpenList/commit/f057846e)
+- **drivers/cloudreve**:
+  - Implement GetDetails &nbsp;-&nbsp; by @xrgzs in https://github.com/OpenListTeam/OpenList/issues/1960 [<samp>(fca99)</samp>](https://github.com/OpenListTeam/OpenList/commit/fca993a8)
+- **drivers/cloudreve_v4**:
+  - Implement Getter interface &nbsp;-&nbsp; by @xrgzs in https://github.com/OpenListTeam/OpenList/issues/1937 [<samp>(5c82f)</samp>](https://github.com/OpenListTeam/OpenList/commit/5c82f552)
+- **drivers/mega**:
+  - Support getting disk usage &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1903 [<samp>(1f9a7)</samp>](https://github.com/OpenListTeam/OpenList/commit/1f9a7e3a)
+  - Support permanently deleting files &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1913 [<samp>(74799)</samp>](https://github.com/OpenListTeam/OpenList/commit/747993e2)
+- **drivers/webdav**:
+  - Add support for 302 redirects &nbsp;-&nbsp; by @xrgzs in https://github.com/OpenListTeam/OpenList/issues/1952 [<samp>(c6bd4)</samp>](https://github.com/OpenListTeam/OpenList/commit/c6bd4372)
 
-##### - 特别感谢 @lidawei97688 付出，本次代码优化由 @lidawei97688 提交的PR贡献！！
- 
-##### 2025/11/12 00:37
-##### - 新增逻辑：手机未处于WiFi模式时，显示localhost:端口，而不是转圈圈显示获取ip失败。【说明一下，localhost＝127.0.0.1属于本地回环ip，只能用于本机访问，不能用于局域网访问。另外思考再三，还是觉得没必要显示移动网络的大内网ip，它的ip不是10就是172开头，公网无法访问，局域网也无法访问。】
-##### - 统一使用magisk或ksu提供的busybox指令集，以免因为不同安卓版本、不同手机厂商因为自身安卓自带的toyboy(阉割版指令集)导致的兼容性问题。解决了《为什么我可以，他不行？为什么他可以，我不行？》这种今人头疼的问题。统一使用busybox指令集更新了action脚本。
-##### - 我想在magisk/ksu取消目前的action按钮🔘，实现一个无限循环脚本，每5秒执行一次。通过magisk/ksu面板上的胶囊开关来控制openlisn开启/关闭服务，这样在切换网络(WiFi或GPRS)状态时，也能够实时刷新ip状态显示到magisk面板上面。缺点就是每5秒唤醒一次CPU，可能会有点耗电(和微信后台疯狂广播你的手机/扫你硬盘来对比，好像这种耗电也是微乎其微)，需要这功能的来issue提建议，你们来投票。
+### &nbsp;&nbsp;&nbsp;🐞 Bug Fixes
 
-##### 2025/11/6 22:44
-##### - action.sh问题同下👇🏻修复细节问题。
-##### - 优化service.sh获取ip地址那段代码
-##### - 不用做sukisu专门适配，因为这货就是ksu魔改，特殊路径都跟ksu一样，白研究半天时间。
+- **api/remove**:
+  - Add validation for empty items in delete file list &nbsp;-&nbsp; by @datao2001 in https://github.com/OpenListTeam/OpenList/issues/1617 [<samp>(d685b)</samp>](https://github.com/OpenListTeam/OpenList/commit/d685bbfa)
+- **ci**:
+  - Change unchecked regex &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1993 [<samp>(27fdd)</samp>](https://github.com/OpenListTeam/OpenList/commit/27fdd03e)
+- **cloudreve**:
+  - Manually set path to avoid empty path &nbsp;-&nbsp; by @TwoOnefour in https://github.com/OpenListTeam/OpenList/issues/1933 [<samp>(0d99e)</samp>](https://github.com/OpenListTeam/OpenList/commit/0d99e16b)
+- **driver/quark_uc**:
+  - Fix display of non-compliant filenames &nbsp;-&nbsp; by @Cp0204 in https://github.com/OpenListTeam/OpenList/issues/2000 [<samp>(02aec)</samp>](https://github.com/OpenListTeam/OpenList/commit/02aec713)
+- **drivers/alias**:
+  - Default sort & substitute link &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1917 [<samp>(f0e53)</samp>](https://github.com/OpenListTeam/OpenList/commit/f0e53d18)
+- **drivers/alist_v3**:
+  - Failed to unmarshal MeResp &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1931 [<samp>(e1921)</samp>](https://github.com/OpenListTeam/OpenList/commit/e1921494)
+- **drivers/cloudreve_v4**:
+  - Add IsFolder attribute to Getter response &nbsp;-&nbsp; by @xrgzs in https://github.com/OpenListTeam/OpenList/issues/2035 [<samp>(29fcf)</samp>](https://github.com/OpenListTeam/OpenList/commit/29fcf590)
+- **drivers/ftp**:
+  - Failed to get objs &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1948 [<samp>(b553d)</samp>](https://github.com/OpenListTeam/OpenList/commit/b553dc35)
+- **drivers/github**:
+  - Failed to get objs &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1915 [<samp>(378e3)</samp>](https://github.com/OpenListTeam/OpenList/commit/378e37b0)
+- **drivers/quark**:
+  - Apply html escaping in quark &nbsp;-&nbsp; by @mkitsdts in https://github.com/OpenListTeam/OpenList/issues/2046 [<samp>(27732)</samp>](https://github.com/OpenListTeam/OpenList/commit/27732ccc)
+- **drivers/seafile**:
+  - Object not found when RootFolderPath != / &nbsp;-&nbsp; by @Khoray in https://github.com/OpenListTeam/OpenList/issues/2010 [<samp>(a2573)</samp>](https://github.com/OpenListTeam/OpenList/commit/a2573fb2)
+- **drivers/strm**:
+  - Delete extra local directories in sync mode &nbsp;-&nbsp; by @sevxn007 in https://github.com/OpenListTeam/OpenList/issues/1980 [<samp>(ea4b5)</samp>](https://github.com/OpenListTeam/OpenList/commit/ea4b5e32)
+- **fs**:
+  - Panic when failed to get storage details &nbsp;-&nbsp; by @KirCute in https://github.com/OpenListTeam/OpenList/issues/1964 [<samp>(85c69)</samp>](https://github.com/OpenListTeam/OpenList/commit/85c69d85)
+  - Handle non-existent destination directory in file transfer &nbsp;-&nbsp; by @Ironboxplus in https://github.com/OpenListTeam/OpenList/issues/1898 [<samp>(a79d8)</samp>](https://github.com/OpenListTeam/OpenList/commit/a79d8347)
+- **webdav/move**:
+  - Fix source file still exist after moving file by webdav &nbsp;-&nbsp; by @mkitsdts in https://github.com/OpenListTeam/OpenList/issues/1979 [<samp>(d8417)</samp>](https://github.com/OpenListTeam/OpenList/commit/d8417e05)
 
-##### 2025/10/12 17:00
-##### - 优化action.sh开关判定逻辑(没优化前部分机型出现了只能关不能启动的神秘情况)
-##### - 虽然模块没有针对sukisu框架做适配，有朋友测试sukisu框架也能使用，他是在安装界面把二进制安装到data/adb/openlist就不会出现框架专用的模块安装路径错误问题。
+### &nbsp;&nbsp;&nbsp;🏎 Performance
 
-##### 2025/10/9 02: 07
-##### 试了一下openlist解除123盘限制那个第三方魔改二进制，还是一样限制。它也不提示限制1G流量，它是直接转圈圈不提示，文件下载链接也没能打开查看。用多线程下载器下载报错403。所以还是用openlist官方二进制好了。
-##### https://github.com/Yxiguan/OpenList_123/
-##### 第三方不开源的魔改版也不知道里面藏了有什么东西。如果你们觉得好奇可以进这个仓库下载替换进去玩玩。
+- **baidu_netdisk**: Reduce the number of file listing requests &nbsp;-&nbsp; by @hcrgm in https://github.com/OpenListTeam/OpenList/issues/2016 [<samp>(031b7)</samp>](https://github.com/OpenListTeam/OpenList/commit/031b719b)
 
-##### 2025/10/2 23：45 更新日志
-##### refactor(module): 改进KernelSU和Magisk兼容性并优化脚本
-##### - 添加KernelSU支持检测和路径处理逻辑
-##### - 使用占位符替换方式更新service.sh配置
-##### - 实现通用的busybox查找函数提高兼容性
-##### - 删除不再使用的KSU.yml工作流文件
-
-##### 下个版本更新预告：
-##### 1、更新兼容APatch框架支持。
-##### 2、二次升级安装时，更换data数据目录时data数据目录自动迁移。
-##### 看心情更新！！而且我也没有这个APatch框架的机器进行测试，行不行全靠蒙。
-##### 3、无论用户在安装模块时是否手动选择，倒计时10秒强制确认。(对没有按键的机顶盒进行支持)
-##### 平常默认无人工干预，工作流自动跟踪oplist最新二进制打包，这里没写更新日志就是模块逻辑没啥变化。
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/OpenListTeam/OpenList/compare/v4.1.9...v4.1.10)
