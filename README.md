@@ -20,6 +20,17 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 - **智能网络适配**：自动识别 WiFi 和移动网络 IP
 - **日志支持**：详细的运行日志记录
 
+## 截图展示
+
+### 安装界面
+![安装界面](install-interface.jpg)
+
+### KernelSU WiFi 网络
+![KernelSU WiFi 网络](kernelsu-wifi.jpg)
+
+### KernelSU 移动网络
+![KernelSU 移动网络](kernelsu-mobile-network.jpg)
+
 ## 系统要求
 
 - Android 设备（支持 ARM 或 ARM64 架构）
