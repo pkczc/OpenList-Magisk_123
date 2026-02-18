@@ -3,10 +3,11 @@
 [![Release](https://img.shields.io/github/v/release/pkczc/OpenList-Magisk_123)](https://github.com/pkczc/OpenList-Magisk_123/releases)
 [![License](https://img.shields.io/github/license/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/blob/main/LICENSE)
 
-OpenList 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) 文件服务器集成到 Android 系统中，通过 Magisk 或 KernelSU 以系统化方式运行，支持 ARM 和 ARM64 架构。
+OpenList 模块将 [OpenList](https://github.com/Yxiguan/OpenList_123) 文件服务器集成到 Android 系统中，通过 Magisk 或 KernelSU 以系统化方式运行，支持 ARM 和 ARM64 架构。
 
 ## 功能亮点
 
+- **替换官方源**：实现 123 网盘无限制下载（上游源已归档，需自测）
 - **灵活安装选项**：支持三种安装位置
   - data/adb/openlist
   - 模块目录/bin

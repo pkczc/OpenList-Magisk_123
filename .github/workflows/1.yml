@@ -70,13 +70,9 @@ jobs:
           # 提取下载链接
           ARM_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
           ARM64_URL=$(echo "$BODY" | grep '"browser_download_url":' | grep 'openlist-android-arm64.tar.gz' | sed -E 's/.*"([^"]+)".*/\1/')
-<<<<<<< HEAD
-          CHANGELOG=$(echo "$BODY" | grep -o '"body":\s*"[^"]*"' | sed -E 's/.*"body":\s*"(.*)"/\1/')
-=======
           
           # 提取 CHANGELOG（使用 Python 处理 JSON）
           CHANGELOG=$(python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('body', ''))" <<< "$BODY")
->>>>>>> 8679981ecb43f021a1ae84ee7f432143036dfeae
 
           if [ -z "$ARM_URL" ] || [ -z "$ARM64_URL" ]; then
             echo "::error::无法提取二进制下载链接"
@@ -231,13 +227,8 @@ jobs:
           # 提交更改
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-<<<<<<< HEAD
-          git add update.json OpenList-Magisk/module.prop
-          git commit -m "更新模块到 OpenList_123 ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
-=======
           git add update.json OpenList-Magisk/module.prop OpenList-Magisk/CHANGELOG.md
-          git commit -m "更新模块到 OpenList ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
->>>>>>> 8679981ecb43f021a1ae84ee7f432143036dfeae
+          git commit -m "更新模块到 OpenList_123 ${{ env.OPENLIST_VERSION }}" || echo "无更改需要提交"
           git push origin main
 
       # 打包模块
@@ -267,14 +258,7 @@ jobs:
           
           # 创建 Release
           gh release create "${{ env.OPENLIST_VERSION }}" \
-<<<<<<< HEAD
             --title "OpenList Magisk 123 Module ${{ env.OPENLIST_VERSION }}" \
-            --notes "Synced with OpenList official release v${{ env.OPENLIST_VERSION }}\n${{ env.OPENLIST_CHANGELOG }}" \
-            --draft=false \
-            --prerelease=false \
-            "openlist-magisk_123-${{ env.OPENLIST_VERSION }}.zip"
-=======
-            --title "OpenList Magisk Module ${{ env.OPENLIST_VERSION }}" \
             --notes-file release_notes.txt \
             --draft=false \
             --prerelease=false \
@@ -284,14 +268,9 @@ jobs:
           
           # 清理临时文件
           rm -f release_notes.txt
->>>>>>> 8679981ecb43f021a1ae84ee7f432143036dfeae
 
       # 清理临时文件
       - name: 清理临时文件
         if: always()
         run: |
-<<<<<<< HEAD
-          rm -rf openlist-magisk_123-*.zip openlist-arm*.tar.gz latest_release.json
-=======
-          rm -rf openlist-magisk-*.zip latest_release.json release_notes.txt
->>>>>>> 8679981ecb43f021a1ae84ee7f432143036dfeae
+          rm -rf openlist-magisk_123-*.zip latest_release.json release_notes.txt
