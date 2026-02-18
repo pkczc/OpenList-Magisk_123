@@ -1,13 +1,12 @@
 # OpenList Magisk(兼容KernelSU) 模块
 
-[![Release](https://img.shields.io/github/v/release/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/releases)
+[![Release](https://img.shields.io/github/v/release/pkczc/OpenList-Magisk_123)](https://github.com/pkczc/OpenList-Magisk_123/releases)
 [![License](https://img.shields.io/github/license/Alien-Et/OpenList-Magisk)](https://github.com/Alien-Et/OpenList-Magisk/blob/main/LICENSE)
-
-OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) 文件服务器集成到 Android 系统中，通过 Magisk 或 KernelSU 以系统化方式运行，支持 ARM 和 ARM64 架构。
+OpenList Magisk 模块将 [OpenList](https://github.com/Yxiguan/OpenList_123) 文件服务器集成到 Android 系统中，通过 Magisk 或 KernelSU 以系统化方式运行，支持 ARM 和 ARM64 架构。
 
 ## 功能亮点
 
-- **替换openlist源**：支持123网盘下载
+- **替换官方源**：实现 123 网盘无限制下载（上游源已归档，需自测）
 - **双框架支持**：同时兼容 Magisk 和 KernelSU
 - **灵活安装选项**：支持三种安装位置
   - data/adb/openlist
@@ -59,7 +58,7 @@ OpenList Magisk 模块将 [OpenList](https://github.com/OpenListTeam/OpenList) �
 ## 安装步骤
 
 1. **下载模块**
-   - 从 [GitHub Releases](https://github.com/Alien-Et/OpenList-Magisk/releases) 下载最新版本
+   - 从 [GitHub Releases](https://github.com/pkczc/OpenList-Magisk_123/releases) 下载最新版本
 
 2. **安装配置**
    - 打开 Magisk 管理器 或 KernelSU 管理器

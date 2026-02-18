@@ -97,7 +97,7 @@ OpenList 模块将 [OpenList](https://github.com/Yxiguan/OpenList_123) 文件服
 
 ## 贡献
 - 欢迎提交 Issue 和 Pull Request
-- 问题反馈：[GitHub Issues](https://github.com/Alien-Et/OpenList-Magisk/issues)
+- 问题反馈：[GitHub Issues](https://github.com/pkczc/OpenList-Magisk_123/issues)
 
 ## 许可证
 本项目基于 [MIT 许可证](LICENSE) 发布。
