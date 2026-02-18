@@ -1,7 +1,13 @@
 id=openlist
 name=OpenList (Magisk/KernelSU)
+<<<<<<< HEAD
 version=v4.1.7
 versionCode=41700
 author=Alien-Et（泡苦茶籽茶二改）
+=======
+version=v4.1.10
+versionCode=401
+author=Alien-Et
+>>>>>>> 8679981ecb43f021a1ae84ee7f432143036dfeae
 description=【已停止】请点击"操作"启动程序。项目地址：https://github.com/Alien-Et/OpenList-Magisk
 updateJson=https://raw.githubusercontent.com/Alien-Et/OpenList-Magisk/main/update.json
