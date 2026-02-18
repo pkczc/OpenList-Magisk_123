@@ -262,7 +262,7 @@ jobs:
             --notes-file release_notes.txt \
             --draft=false \
             --prerelease=false \
-            "openlist-magisk-${{ env.OPENLIST_VERSION }}.zip"
+            "openlist-magisk_123-${{ env.OPENLIST_VERSION }}.zip"
           
           echo "Release ${{ env.OPENLIST_VERSION }} 创建成功"
           
