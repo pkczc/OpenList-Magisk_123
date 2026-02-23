@@ -12,11 +12,12 @@ TEMP_PORT_FILE="$MODDIR/port_result.tmp"
 
 # 查找可用的busybox路径，兼容Magisk和KSU
 toast_find_busybox() {
-    # 检查多个可能的busybox路径，按优先级排序
     if [ -x "/data/adb/magisk/busybox" ]; then
         echo "/data/adb/magisk/busybox"
     elif [ -x "/data/adb/ksu/bin/busybox" ]; then
         echo "/data/adb/ksu/bin/busybox"
+    elif [ -x "/data/adb/ap/bin/busybox" ]; then
+        echo "/data/adb/ap/bin/busybox"
     elif command -v busybox >/dev/null; then
         echo "$(command -v busybox)"
     else
@@ -135,6 +136,11 @@ update_module_prop_running() {
     if [ -z "$pid" ]; then
         log "错误: 未找到运行中的 openlist"
         NEW_DESC="description=【未运行】无法找到 openlist 进程，请检查日志 $LOG_FILE"
+        # 直接更新 module.prop 并返回
+        grep -v '^description=' "$MODULE_PROP_FILE" > "${MODULE_PROP_FILE}.tmp" 2>/dev/null
+        echo "$NEW_DESC" >> "${MODULE_PROP_FILE}.tmp"
+        mv "${MODULE_PROP_FILE}.tmp" "$MODULE_PROP_FILE" 2>/dev/null
+        return 1
     else
         log "找到 Openlist PID: $pid"
         get_port "$pid" &
@@ -218,10 +224,6 @@ if ! command -v ip >/dev/null; then
     exit 1
 fi
 
-if [ "$OPENLIST_BINARY" = "TO_BE_REPLACED" ]; then
-    log "错误: OPENLIST_BINARY 未在安装时配置"
-    exit 1
-fi
 if [ ! -f "$OPENLIST_BINARY" ]; then
     log "错误: $OPENLIST_BINARY 不存在"
     exit 1
@@ -232,11 +234,6 @@ if [ ! -x "$OPENLIST_BINARY" ]; then
         log "错误: 无法设置 $OPENLIST_BINARY 的执行权限"
         exit 1
     }
-fi
-
-if [ "$DATA_DIR" = "TO_BE_REPLACED" ]; then
-    log "错误: DATA_DIR 未在安装时配置"
-    exit 1
 fi
 
 mkdir -p "$DATA_DIR" 2>/dev/null
